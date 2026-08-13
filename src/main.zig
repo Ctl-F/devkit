@@ -4,8 +4,8 @@ const Io = std.Io;
 const rndr = @import("rndr");
 
 pub fn main(init: std.process.Init) !void {
-    _ = init;
+    const GPU = rndr.GPUDevice(rndr.DummyBackend);
 
-    const a: rndr.GPUDevice.Handle = undefined;
-    _ = a;
+    var gpu = GPU.init(.{}, init.io, init.gpa);
+    defer gpu.deinit();
 }

@@ -104,6 +104,7 @@
 // };
 
 const core = @import("renderer/core.zig");
+pub const DummyBackend = @import("renderer/backends/dummy.zig");
 
 pub const Resourcetype = core.ResourceType;
 pub const GPUDevice = core.GPUDevice;

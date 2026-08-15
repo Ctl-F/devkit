@@ -76,6 +76,7 @@ pub const ShaderInfo = struct {
 };
 
 pub const PipelineConfig = struct {
+    name: []const u8,
     topology: Topology,
     culling: CullMode,
     winding: WindingOrder,
@@ -154,13 +155,13 @@ pub const TextureConfig = struct {
     width: u32,
     height: u32,
     format: TextureFormat,
-    data: ?Backend.Buffer,
+    data: ?Buffer,
     mipLevels: u8,
     samplerInfo: SamplerInfo,
 };
 
 pub const RenderCommand = union(enum) {
-    renderBegin: Backend.Pipeline,
+    renderBegin: Pipeline,
     renderEnd,
 
     render: Render,
@@ -179,6 +180,21 @@ pub const CopyCommand = union(enum) {
 
 pub const RenderCommandBuffer = struct {
     commands: std.ArrayList(RenderCommand),
+
+    pub const empty: @This() = .{ .commands = .empty };
+
+    pub fn begin(allocator: std.mem.Allocator, pipeline: Pipeline) @This() {
+        var new = @This().empty;
+
+        try new.commands.append(allocator, .{
+            .renderBegin = pipeline,
+        });
+
+        return new;
+    }
+
+
+    pub fn render()
 };
 
 pub const CopyCommandBuffer = struct {
@@ -193,9 +209,9 @@ pub const Backend = struct {
     pub const Context = *opaque {};
     pub const Config = *opaque {};
 
-    const MaxAlign = @alignOf(std.c.max_align_t);
+    pub const MaxAlign = @alignOf(std.c.max_align_t);
 
-    init: fn (config: Config) Context,
+    init: fn (config: Config) anyerror!Context,
     deinit: fn (context: Context) void,
 
     allocateBuffer: fn (context: Context, length: usize, usage: BufferHint) ?Buffer,
